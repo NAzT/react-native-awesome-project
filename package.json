@@ -1,0 +1,28 @@
+{
+  "name": "AwesomeProject",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "jest-expo": "~18.0.0",
+    "react-test-renderer": "16.0.0-alpha.12"
+  },
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "node node_modules/jest/bin/jest.js --watch"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^5.0.0",
+    "react": "16.0.0-alpha.12",
+    "react-native": "^0.45.1",
+    "react-native-beacons-manager": "^1.0.4",
+    "react-native-ibeacon": "^0.6.0",
+    "react-native-maps": "^0.15.3",
+    "react-native-tab-view": "^0.0.67",
+    "react-native-vector-icons": "^4.2.0"
+  }
+}

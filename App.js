@@ -1,22 +1,14 @@
 /* @flow */
 
+/* @flow */
+
 import React, {PureComponent} from 'react';
-import {
-    Animated,
-    View,
-    TouchableWithoutFeedback,
-    StyleSheet,
-} from 'react-native';
-import {TabViewAnimated} from 'react-native-tab-view';
-// import {Ionicons} from '@expo/vector-icons';
-// 'react-native-vector-icons/Ionicons';
-// import {Ionicons} from 'react-native-vector-icons/Ionicons';
+import {Animated, View, Text, StyleSheet} from 'react-native';
+import {TabViewAnimated, TabBar} from 'react-native-tab-view';
+import SimplePage from './SimplePage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import BasicListView from './BasicListView';
 
 import type {NavigationState} from 'react-native-tab-view/types';
-
-const AnimatedIcon = Animated.createAnimatedComponent(Ionicons);
 
 type Route = {
     key: string,
@@ -26,18 +18,16 @@ type Route = {
 
 type State = NavigationState<Route>;
 
-export default class App extends PureComponent<void, *, State> {
-    static title = 'No animation';
-    static backgroundColor = '#f4f4f4';
-    static tintColor = '#222';
+export default class TopBarIconExample extends PureComponent<void, *, State> {
+    static title = 'Bottom bar with indicator';
     static appbarElevation = 4;
 
     state: State = {
         index: 0,
         routes: [
-            {key: '1', title: 'Featured', icon: 'ios-star'},
-            {key: '2', title: 'Playlists', icon: 'ios-albums'},
-            {key: '3', title: 'Near Me', icon: 'ios-navigate'},
+            {key: '1', title: 'First', icon: 'ios-speedometer'},
+            {key: '2', title: 'Second', icon: 'ios-game-controller-b'},
+            {key: '3', title: 'Third', icon: 'ios-basketball'},
         ],
     };
 
@@ -47,103 +37,54 @@ export default class App extends PureComponent<void, *, State> {
         });
     };
 
-    _renderLabel = ({position, navigationState}) => ({route, index}) => {
-        const inputRange = navigationState.routes.map((x, i) => i);
-        const outputRange = inputRange.map(
-            inputIndex => (inputIndex === index ? '#2196f3' : '#939393'),
-        );
-        const color = position.interpolate({
-            inputRange,
-            outputRange,
-        });
+    _renderIndicator = props => {
+        const {width, position} = props;
+        const translateX = Animated.multiply(position, width);
+
         return (
-            <Animated.Text style={[styles.label, {color}]}>
-                {route.title}
-            </Animated.Text>
+            <Animated.View
+                style={[styles.container, {width, transform: [{translateX}]}]}>
+                <View style={styles.indicator}/>
+            </Animated.View>
         );
     };
 
-    _renderIcon = ({navigationState, position}) => ({
-                                                        route,
-                                                        index,
-                                                    }: { route: Route, index: number }) => {
-        const inputRange = navigationState.routes.map((x, i) => i);
-        const filledOpacity = position.interpolate({
-            inputRange,
-            outputRange: inputRange.map(i => (i === index ? 1 : 0)),
-        });
-        const outlineOpacity = position.interpolate({
-            inputRange,
-            outputRange: inputRange.map(i => (i === index ? 0 : 1)),
-        });
-        return (
-            <View style={styles.iconContainer}>
-                <AnimatedIcon
-                    name={route.icon}
-                    size={26}
-                    style={[styles.icon, {opacity: filledOpacity}]}
-                />
-                <AnimatedIcon
-                    name={route.icon + '-outline'}
-                    size={26}
-                    style={[styles.icon, styles.outline, {opacity: outlineOpacity}]}
-                />
-            </View>
-        );
+    _renderIcon = ({route}) => {
+        return <Ionicons name={route.icon} size={24} style={styles.icon}/>;
+    };
+
+    _renderBadge = ({route}) => {
+        if (route.key === '2') {
+            return (
+                <View style={styles.badge}>
+                    <Text style={styles.count}>42</Text>
+                </View>
+            );
+        }
+        return null;
     };
 
     _renderFooter = props => {
         return (
-            <View style={styles.tabbar}>
-                {props.navigationState.routes.map((route, index) => {
-                    return (
-                        <TouchableWithoutFeedback
-                            key={route.key}
-                            onPress={() => props.jumpToIndex(index)}
-                        >
-                            <Animated.View style={styles.tab}>
-                                {this._renderIcon(props)({route, index})}
-                                {this._renderLabel(props)({route, index})}
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
-                    );
-                })}
-            </View>
+            <TabBar
+                {...props}
+                renderIcon={this._renderIcon}
+                renderBadge={this._renderBadge}
+                renderIndicator={this._renderIndicator}
+                style={styles.tabbar}
+                tabStyle={styles.tab}
+            />
         );
     };
 
     _renderScene = ({route}) => {
         switch (route.key) {
             case '1':
-                return (
-                    <BasicListView
-                        style={[styles.page, {backgroundColor: '#E3F4DD'}]}
-                    />
-                );
+                return ( <SimplePage state={this.state} style={{backgroundColor: '#ff4081'}} /> );
             case '2':
-                return (
-                    <BasicListView
-                        style={[styles.page, {backgroundColor: '#E6BDC5'}]}
-                    />
-                );
+                return ( <SimplePage state={this.state} style={{backgroundColor: '#673ab7'}} /> );
             case '3':
-                return (
-                    <BasicListView
-                        style={[styles.page, {backgroundColor: '#9DB1B5'}]}
-                    />
-                );
-            case '4':
-                return (
-                    <BasicListView
-                        style={[styles.page, {backgroundColor: '#EDD8B5'}]}
-                    />
-                );
-            case '5':
-                return (
-                    <BasicListView
-                        style={[styles.page, {backgroundColor: '#9E9694'}]}
-                    />
-                );
+                return ( <SimplePage state={this.state} style={{backgroundColor: '#4caf50'}} /> );
             default:
                 return null;
         }
@@ -157,8 +98,6 @@ export default class App extends PureComponent<void, *, State> {
                 renderScene={this._renderScene}
                 renderFooter={this._renderFooter}
                 onRequestChangeTab={this._handleChangeTab}
-                animationEnabled={false}
-                swipeEnabled={false}
             />
         );
     }
@@ -169,41 +108,36 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     tabbar: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        backgroundColor: '#f4f4f4',
+        backgroundColor: '#222',
     },
     tab: {
-        flex: 1,
-        alignItems: 'center',
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: 'rgba(0, 0, 0, .2)',
-        paddingTop: 4.5,
-    },
-    iconContainer: {
-        height: 26,
-        width: 26,
+        padding: 0,
     },
     icon: {
-        position: 'absolute',
-        textAlign: 'center',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        color: '#0084ff',
-    },
-    outline: {
-        color: '#939393',
-    },
-    label: {
-        fontSize: 10,
-        marginTop: 3,
-        marginBottom: 1.5,
         backgroundColor: 'transparent',
+        color: 'white',
     },
-    page: {
+    indicator: {
         flex: 1,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#0084ff',
+        margin: 4,
+        borderRadius: 2,
+    },
+    badge: {
+        marginTop: 4,
+        marginRight: 32,
+        backgroundColor: '#f44336',
+        height: 24,
+        width: 24,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 4,
+    },
+    count: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+        marginTop: -2,
     },
 });
